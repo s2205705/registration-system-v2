@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Registration</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f3f3f3;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #ffffff;
+            border: 1px solid #e1e1e1;
+            border-radius: 8px;
+            padding: 20px 30px;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2b579a;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .upload-section, .add-section, .search-section {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            color: #333333;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        input[type="file"], input[type="text"] {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        input[type="file"]:hover, input[type="text"]:focus {
+            border-color: #0078d4;
+        }
+
+        .buttons {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        button {
+            background-color: #0078d4;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin: 5px;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        button:hover {
+            background-color: #005a9e;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        thead {
+            background-color: #f3f3f3;
+        }
+
+        th {
+            color: #333333;
+            font-weight: 600;
+            text-align: left;
+            padding: 10px;
+            border-bottom: 2px solid #e1e1e1;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        tbody tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #fcfcfc;
+        }
+
+        input[type="checkbox"] {
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        .count {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #333333;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Event Registration</h1>
+        <div class="count">
+            <span id="totalCount">Total Attendees: 0</span> | 
+            <span id="presentCount">Present: 0</span>
+        </div>
+        <div class="upload-section">
+            <label for="fileInput">Upload Attendee List (CSV):</label>
+            <input type="file" id="fileInput" accept=".csv">
+        </div>
+        <div class="search-section">
+            <label for="searchInput">Search Attendee by Last Name:</label>
+            <input type="text" id="searchInput" placeholder="Enter last name...">
+        </div>
+        <div class="buttons">
+            <button id="sortButton">Sort Alphabetically by Last Name</button>
+        </div>
+        <div class="add-section">
+            <button id="addAttendeeButton">Add New Attendee</button>
+        </div>
+        <table id="attendeesTable">
+            <thead>
+                <tr>
+                    <th>Last Name</th>
+                    <th>First Name</th>
+                    <th>Company</th>
+                    <th>Email</th>
+                    <th>Present</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Attendees will be populated here -->
+            </tbody>
+        </table>
+        <div class="buttons">
+            <button id="downloadCSVButton">Download Updated CSV</button>
+        </div>
+    </div>
+    <script>
+        document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+        document.getElementById('sortButton').addEventListener('click', sortAttendees);
+        document.getElementById('searchInput').addEventListener('input', searchAttendees);
+        document.getElementById('addAttendeeButton').addEventListener('click', addAttendee);
+        document.getElementById('downloadCSVButton').addEventListener('click', downloadCSV);
+
+        let attendees = [];
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const rows = e.target.result.split('\n').map(row => row.trim());
+                    attendees = rows.slice(1).filter(row => row).map((row, index) => {
+                        const [last_name, first_name, company, email] = row.split(',').map(field => field.trim());
+                        return { id: index, last_name, first_name, company, email, present: false };
+                    });
+                    displayAttendees(attendees);
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function displayAttendees(data) {
+            const tableBody = document.querySelector('#attendeesTable tbody');
+            tableBody.innerHTML = '';
+            data.forEach(attendee => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${attendee.last_name}</td>
+                    <td>${attendee.first_name}</td>
+                    <td>${attendee.company}</td>
+                    <td>${attendee.email}</td>
+                    <td><input type="checkbox" data-id="${attendee.id}" ${attendee.present ? 'checked' : ''}></td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            document.querySelectorAll('#attendeesTable input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', handleCheckboxChange);
+            });
+
+            updateCounts();
+        }
+
+        function handleCheckboxChange(event) {
+            const id = parseInt(event.target.getAttribute('data-id'));
+            const attendee = attendees.find(att => att.id === id);
+            if (attendee) {
+                attendee.present = event.target.checked;
+            }
+            updateCounts();
+        }
+
+        function updateCounts() {
+            const totalCount = attendees.length;
+            const presentCount = attendees.filter(att => att.present).length;
+            document.getElementById('totalCount').textContent = `Total Attendees: ${totalCount}`;
+            document.getElementById('presentCount').textContent = `Present: ${presentCount}`;
+        }
+
+        function sortAttendees() {
+            attendees.sort((a, b) => a.last_name.localeCompare(b.last_name));
+            displayAttendees(attendees);
+        }
+
+        function searchAttendees() {
+            const searchValue = document.getElementById('searchInput').value.toLowerCase();
+            const filteredAttendees = attendees.filter(attendee =>
+                attendee.last_name.toLowerCase().includes(searchValue)
+            );
+            displayAttendees(filteredAttendees);
+        }
+
+        function addAttendee() {
+            const last_name = prompt('Enter Last Name:').trim();
+            const first_name = prompt('Enter First Name:').trim();
+            const company = prompt('Enter Company:').trim();
+            const email = prompt('Enter Email:').trim();
+
+            if (last_name && first_name && company && email) {
+                attendees.push({ id: attendees.length, last_name, first_name, company, email, present: false });
+                displayAttendees(attendees);
+            } else {
+                alert('All fields are required!');
+            }
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            fetch('/upload-csv', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                attendees = data.attendees;
+                displayAttendees(attendees);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function displayAttendees(data) {
+            const tableBody = document.querySelector('#attendeesTable tbody');
+            tableBody.innerHTML = '';
+            data.forEach(attendee => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${attendee.last_name}</td>
+                    <td>${attendee.first_name}</td>
+                    <td>${attendee.company}</td>
+                    <td>${attendee.email}</td>
+                    <td><input type="checkbox" data-id="${attendee.id}" ${attendee.present ? 'checked' : ''}></td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            updateCounts();
+        }
+
+        function updateCounts() {
+            const totalCount = attendees.length;
+            const presentCount = attendees.filter(att => att.present).length;
+            document.getElementById('totalCount').textContent = `Total Attendees: ${totalCount}`;
+            document.getElementById('presentCount').textContent = `Present: ${presentCount}`;
+        }
+
+        function sortAttendees() {
+            attendees.sort((a, b) => a.last_name.localeCompare(b.last_name));
+            displayAttendees(attendees);
+        }
+
+        function searchAttendees() {
+            const searchValue = document.getElementById('searchInput').value.toLowerCase();
+            const filteredAttendees = attendees.filter(attendee =>
+                attendee.last_name.toLowerCase().includes(searchValue)
+            );
+            displayAttendees(filteredAttendees);
+        }
+
+        function addAttendee() {
+            const last_name = prompt('Enter Last Name:').trim();
+            const first_name = prompt('Enter First Name:').trim();
+            const company = prompt('Enter Company:').trim();
+            const email = prompt('Enter Email:').trim();
+
+            if (last_name && first_name && company && email) {
+                attendees.push({ id: attendees.length, last_name, first_name, company, email, present: false });
+                displayAttendees(attendees);
+            } else {
+                alert('All fields are required!');
+            }
+        }
+
+        function downloadCSV() {
+            fetch('/download-csv')
+                .then(response => response.blob())
+                .then(blob => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'updated_attendees.csv';
+                    link.click();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
