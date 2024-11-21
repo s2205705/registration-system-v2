@@ -24,7 +24,7 @@ app.post('/upload-csv', upload.single('file'), (req, res) => {
         .pipe(csvParser())
         .on('data', (row) => {
             const { last_name, first_name, company, email } = row;
-            db.run("INSERT INTO attendees (last_name, first_name, company, email, present) VALUES (?, ?, ?, ?, ?)", [last_name, first_name, company, email, 0]);
+            db.run("INSERT INTO attendees (name, company, email, present) VALUES (?, ?, ?, ?, ?)", [name, company, email, 0]);
             attendees.push({ last_name, first_name, company, email, present: false });
         })
         .on('end', () => {
