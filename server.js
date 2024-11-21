@@ -25,7 +25,7 @@ app.post('/upload-csv', upload.single('file'), (req, res) => {
         .on('data', (row) => {
             const {name, company, email } = row;
             db.run("INSERT INTO attendees (name, company, email, present) VALUES (?, ?, ?, ?, ?)", [name, company, email, 0]);
-            attendees.push({ last_name, first_name, company, email, present: false });
+            attendees.push({ name, company, email, present: false });
         })
         .on('end', () => {
             fs.unlinkSync(filePath); // Delete the uploaded file
