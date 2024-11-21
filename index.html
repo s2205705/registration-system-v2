@@ -186,7 +186,7 @@
                 reader.onload = function(e) {
                     const rows = e.target.result.split('\n').map(row => row.trim());
                     attendees = rows.slice(1).filter(row => row).map((row, index) => {
-                        const [last_name, first_name, company, email] = row.split(',').map(field => field.trim());
+                        const [name, company, email] = row.split(',').map(field => field.trim());
                         return { id: index, last_name, first_name, company, email, present: false };
                     });
                     displayAttendees(attendees);
@@ -261,9 +261,9 @@
         }
 
         function downloadCSV() {
-            let csvContent = 'Last Name,First Name,Company,Email,Present\n';
+            let csvContent = 'Name,Company,Email,Present\n';
             attendees.forEach(att => {
-                csvContent += `${att.last_name},${att.first_name},${att.company},${att.email},${att.present ? 'Yes' : 'No'}\n`;
+                csvContent += `${att.name},${att.company},${att.email},${att.present ? 'Yes' : 'No'}\n`;
             });
 
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
