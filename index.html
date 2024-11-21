@@ -201,8 +201,7 @@
             data.forEach(attendee => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${attendee.last_name}</td>
-                    <td>${attendee.first_name}</td>
+                    <td>${attendee.name}</td>
                     <td>${attendee.company}</td>
                     <td>${attendee.email}</td>
                     <td><input type="checkbox" data-id="${attendee.id}" ${attendee.present ? 'checked' : ''}></td>
@@ -253,7 +252,7 @@
             const email = prompt('Enter Email:').trim();
 
             if (last_name && first_name && company && email) {
-                attendees.push({ id: attendees.length, last_name, first_name, company, email, present: false });
+                attendees.push({ id: attendees.length, name,company, email, present: false });
                 displayAttendees(attendees);
             } else {
                 alert('All fields are required!');
