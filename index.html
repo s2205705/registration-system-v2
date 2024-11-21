@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Event Registration</title>
     <style>
+        /* Styling remains the same */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f3f3f3;
@@ -134,20 +135,16 @@
 <body>
     <div class="container">
         <h1>Event Registration</h1>
-        <div class="count">
-            <span id="totalCount">Total Attendees: 0</span> | 
-            <span id="presentCount">Present: 0</span>
-        </div>
         <div class="upload-section">
             <label for="fileInput">Upload Attendee List (CSV):</label>
             <input type="file" id="fileInput" accept=".csv">
         </div>
         <div class="search-section">
-            <label for="searchInput">Search Attendee by Name:</label>
-            <input type="text" id="searchInput" placeholder="Enter name...">
+            <label for="searchInput">Search Attendee by Last Name:</label>
+            <input type="text" id="searchInput" placeholder="Enter last name...">
         </div>
         <div class="buttons">
-            <button id="sortButton">Sort Alphabetically by Name</button>
+            <button id="sortButton">Sort Alphabetically by Last Name</button>
         </div>
         <div class="add-section">
             <button id="addAttendeeButton">Add New Attendee</button>
@@ -155,7 +152,8 @@
         <table id="attendeesTable">
             <thead>
                 <tr>
-                    <th>Name</th>
+                    <th>Last Name</th>
+                    <th>First Name</th>
                     <th>Company</th>
                     <th>Email</th>
                     <th>Present</th>
@@ -165,18 +163,22 @@
                 <!-- Attendees will be populated here -->
             </tbody>
         </table>
+        <div class="count">
+            <span id="totalCount">Total Attendees: 0</span> | 
+            <span id="presentCount">Present: 0</span>
+        </div>
         <div class="buttons">
             <button id="downloadCSVButton">Download Updated CSV</button>
         </div>
     </div>
     <script>
+        let attendees = [];
+
         document.getElementById('fileInput').addEventListener('change', handleFileUpload);
         document.getElementById('sortButton').addEventListener('click', sortAttendees);
         document.getElementById('searchInput').addEventListener('input', searchAttendees);
         document.getElementById('addAttendeeButton').addEventListener('click', addAttendee);
         document.getElementById('downloadCSVButton').addEventListener('click', downloadCSV);
-
-        let attendees = [];
 
         function handleFileUpload(event) {
             const file = event.target.files[0];
@@ -185,8 +187,8 @@
                 reader.onload = function(e) {
                     const rows = e.target.result.split('\n').map(row => row.trim());
                     attendees = rows.slice(1).filter(row => row).map((row, index) => {
-                        const [name, company, email] = row.(',').map(field => field.trim());
-                        return { id: index,name, company, email, present: false };
+                        const [last_name, first_name, company, email] = row.split(',').map(field => field.trim());
+                        return { id: index, last_name, first_name, company, email, present: false };
                     });
                     displayAttendees(attendees);
                 };
@@ -200,7 +202,8 @@
             data.forEach(attendee => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${attendee.name}</td>
+                    <td>${attendee.last_name}</td>
+                    <td>${attendee.first_name}</td>
                     <td>${attendee.company}</td>
                     <td>${attendee.email}</td>
                     <td><input type="checkbox" data-id="${attendee.id}" ${attendee.present ? 'checked' : ''}></td>
@@ -232,7 +235,7 @@
         }
 
         function sortAttendees() {
-            attendees.sort((a, b) => a.name.localeCompare(b.name));
+            attendees.sort((a, b) => a.last_name.localeCompare(b.last_name));
             displayAttendees(attendees);
         }
 
@@ -245,12 +248,13 @@
         }
 
         function addAttendee() {
-            const last_name = prompt('Enter Full Name:').trim();
+            const last_name = prompt('Enter Last Name:').trim();
+            const first_name = prompt('Enter First Name:').trim();
             const company = prompt('Enter Company:').trim();
             const email = prompt('Enter Email:').trim();
 
-            if (name && company && email) {
-                attendees.push({ id: attendees.length, name,company, email, present: false });
+            if (last_name && first_name && company && email) {
+                attendees.push({ id: attendees.length, last_name, first_name, company, email, present: false });
                 displayAttendees(attendees);
             } else {
                 alert('All fields are required!');
@@ -258,9 +262,9 @@
         }
 
         function downloadCSV() {
-            let csvContent = 'Name,Company,Email,Present\n';
+            let csvContent = 'Last Name,First Name,Company,Email,Present\n';
             attendees.forEach(att => {
-                csvContent += `${att.name},${att.company},${att.email},${att.present ? 'Yes' : 'No'}\n`;
+                csvContent += `${att.last_name},${att.first_name},${att.company},${att.email},${att.present ? 'Yes' : 'No'}\n`;
             });
 
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
