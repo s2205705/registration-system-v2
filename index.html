@@ -201,8 +201,7 @@
             data.forEach(attendee => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${attendee.last_name}</td>
-                    <td>${attendee.first_name}</td>
+                    <td>${attendee.name}</td>
                     <td>${attendee.company}</td>
                     <td>${attendee.email}</td>
                     <td><input type="checkbox" data-id="${attendee.id}" ${attendee.present ? 'checked' : ''}></td>
@@ -261,7 +260,7 @@
         }
 
         function downloadCSV() {
-            let csvContent = 'Last Name,First Name,Company,Email,Present\n';
+            let csvContent = 'Name,Company,Email,Present\n';
             attendees.forEach(att => {
                 csvContent += `${att.name},${att.company},${att.email},${att.present ? 'Yes' : 'No'}\n`;
             });
