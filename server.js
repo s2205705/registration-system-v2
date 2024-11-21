@@ -42,7 +42,7 @@ app.get('/download-csv', (req, res) => {
 
         let csvContent = 'Name,Company,Email,Present\n';
         rows.forEach(row => {
-            csvContent += `${row.last_name},${row.first_name},${row.company},${row.email},${row.present ? 'Yes' : 'No'}\n`;
+            csvContent += `${row.name},${row.company},${row.email},${row.present ? 'Yes' : 'No'}\n`;
         });
 
         res.header('Content-Type', 'text/csv');
