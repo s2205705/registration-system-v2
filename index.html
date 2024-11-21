@@ -252,7 +252,7 @@
             const email = prompt('Enter Email:').trim();
 
             if (name && company && email) {
-                attendees.push({ id: attendees.length, name,company, email, present: false });
+                attendees.push({ id: attendees.length, name, company, email, present: false });
                 displayAttendees(attendees);
             } else {
                 alert('All fields are required!');
