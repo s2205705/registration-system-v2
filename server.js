@@ -24,7 +24,7 @@ app.post('/upload-csv', upload.single('file'), (req, res) => {
         .pipe(csvParser())
         .on('data', (row) => {
             const { last_name, first_name, company, email } = row;
-            db.run("INSERT INTO attendees (name, company, email, present) VALUES (?, ?, ?, ?, ?)", [name, company, email, present]);
+            db.run("INSERT INTO attendees (name, company, email, present) VALUES (?, ?, ?, ?, ?)", [last_name,first_name company, email, present]);
             attendees.push({ last_name, first_name, company, email, present: false });
         })
         .on('end', () => {
@@ -42,7 +42,7 @@ app.get('/download-csv', (req, res) => {
 
         let csvContent = 'Last Name,First Name,Company,Email,Present\n';
         rows.forEach(row => {
-            csvContent += `${row.name},${row.company},${row.email},${row.present ? 'Yes' : 'No'}\n`;
+            csvContent += `${row.last_name},${row.first_name},${row.company},${row.email},${row.present ? 'Yes' : 'No'}\n`;
         });
 
         res.header('Content-Type', 'text/csv');
