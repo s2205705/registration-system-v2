@@ -143,11 +143,11 @@
             <input type="file" id="fileInput" accept=".csv">
         </div>
         <div class="search-section">
-            <label for="searchInput">Search Attendee by Last Name:</label>
-            <input type="text" id="searchInput" placeholder="Enter last name...">
+            <label for="searchInput">Search Attendee by Name:</label>
+            <input type="text" id="searchInput" placeholder="Enter name...">
         </div>
         <div class="buttons">
-            <button id="sortButton">Sort Alphabetically by Last Name</button>
+            <button id="sortButton">Sort Alphabetically by Name</button>
         </div>
         <div class="add-section">
             <button id="addAttendeeButton">Add New Attendee</button>
@@ -155,8 +155,7 @@
         <table id="attendeesTable">
             <thead>
                 <tr>
-                    <th>Last Name</th>
-                    <th>First Name</th>
+                    <th>Name</th>
                     <th>Company</th>
                     <th>Email</th>
                     <th>Present</th>
@@ -170,29 +169,32 @@
             <button id="downloadCSVButton">Download Updated CSV</button>
         </div>
     </div>
+
     <script>
+        let attendees = [];
+
+        // Handle CSV file upload and send it to the backend
         document.getElementById('fileInput').addEventListener('change', handleFileUpload);
         document.getElementById('sortButton').addEventListener('click', sortAttendees);
         document.getElementById('searchInput').addEventListener('input', searchAttendees);
         document.getElementById('addAttendeeButton').addEventListener('click', addAttendee);
         document.getElementById('downloadCSVButton').addEventListener('click', downloadCSV);
 
-        let attendees = [];
-
         function handleFileUpload(event) {
             const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const rows = e.target.result.split('\n').map(row => row.trim());
-                    attendees = rows.slice(1).filter(row => row).map((row, index) => {
-                        const [last_name, first_name, company, email] = row.split(',').map(field => field.trim());
-                        return { id: index, last_name, first_name, company, email, present: false };
-                    });
-                    displayAttendees(attendees);
-                };
-                reader.readAsText(file);
-            }
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/upload-csv', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                attendees = data.attendees;
+                displayAttendees(attendees);
+            })
+            .catch(error => console.error('Error:', error));
         }
 
         function displayAttendees(data) {
@@ -201,28 +203,13 @@
             data.forEach(attendee => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${attendee.last_name}</td>
-                    <td>${attendee.first_name}</td>
+                    <td>${attendee.name}</td>
                     <td>${attendee.company}</td>
                     <td>${attendee.email}</td>
                     <td><input type="checkbox" data-id="${attendee.id}" ${attendee.present ? 'checked' : ''}></td>
                 `;
                 tableBody.appendChild(row);
             });
-
-            document.querySelectorAll('#attendeesTable input[type="checkbox"]').forEach(checkbox => {
-                checkbox.addEventListener('change', handleCheckboxChange);
-            });
-
-            updateCounts();
-        }
-
-        function handleCheckboxChange(event) {
-            const id = parseInt(event.target.getAttribute('data-id'));
-            const attendee = attendees.find(att => att.id === id);
-            if (attendee) {
-                attendee.present = event.target.checked;
-            }
             updateCounts();
         }
 
@@ -234,26 +221,25 @@
         }
 
         function sortAttendees() {
-            attendees.sort((a, b) => a.last_name.localeCompare(b.last_name));
+            attendees.sort((a, b) => a.name.localeCompare(b.name));
             displayAttendees(attendees);
         }
 
         function searchAttendees() {
             const searchValue = document.getElementById('searchInput').value.toLowerCase();
             const filteredAttendees = attendees.filter(attendee =>
-                attendee.last_name.toLowerCase().includes(searchValue)
+                attendee.name.toLowerCase().includes(searchValue)
             );
             displayAttendees(filteredAttendees);
         }
 
         function addAttendee() {
-            const last_name = prompt('Enter Last Name:').trim();
-            const first_name = prompt('Enter First Name:').trim();
+            const name = prompt('Enter Name (First and Last):').trim();
             const company = prompt('Enter Company:').trim();
             const email = prompt('Enter Email:').trim();
 
-            if (last_name && first_name && company && email) {
-                attendees.push({ id: attendees.length, last_name, first_name, company, email, present: false });
+            if (name && company && email) {
+                attendees.push({ id: attendees.length, name, company, email, present: false });
                 displayAttendees(attendees);
             } else {
                 alert('All fields are required!');
@@ -261,16 +247,15 @@
         }
 
         function downloadCSV() {
-            let csvContent = 'Last Name,First Name,Company,Email,Present\n';
-            attendees.forEach(att => {
-                csvContent += `${att.last_name},${att.first_name},${att.company},${att.email},${att.present ? 'Yes' : 'No'}\n`;
-            });
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'updated_attendees.csv';
-            link.click();
+            fetch('/download-csv')
+                .then(response => response.blob())
+                .then(blob => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'updated_attendees.csv';
+                    link.click();
+                })
+                .catch(error => console.error('Error:', error));
         }
     </script>
 </body>
