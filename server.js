@@ -12,7 +12,7 @@ const db = new sqlite3.Database('./attendees.db');
 
 // Initialize the database
 db.serialize(() => {
-    db.run("CREATE TABLE IF NOT EXISTS attendees (id INTEGER PRIMARY KEY, name TEXT, company TEXT, email TEXT, present BOOLEAN)");
+    db.run("CREATE TABLE IF NOT EXISTS attendees (id INTEGER PRIMARY KEY, last_name TEXT, first_name TEXT, company TEXT, email TEXT, present INTEGER)");
 });
 
 // Endpoint to handle CSV upload and save to database
@@ -23,9 +23,9 @@ app.post('/upload-csv', upload.single('file'), (req, res) => {
     fs.createReadStream(filePath)
         .pipe(csvParser())
         .on('data', (row) => {
-            const { name, company, email } = row;
-            db.run("INSERT INTO attendees (name, company, email, present) VALUES (?, ?, ?, ?, ?)", [name, company, email,0]);
-            attendees.push({ name, company, email, present: false });
+            const { last_name, first_name, company, email } = row;
+            db.run("INSERT INTO attendees (last_name, first_name, company, email, present) VALUES (?, ?, ?, ?, ?)", [last_name, first_name, company, email, 0]);
+            attendees.push({ last_name, first_name, company, email, present: false });
         })
         .on('end', () => {
             fs.unlinkSync(filePath); // Delete the uploaded file
@@ -40,9 +40,9 @@ app.get('/download-csv', (req, res) => {
             throw err;
         }
 
-        let csvContent = 'Name,Company,Email,Present\n';
+        let csvContent = 'Last Name,First Name,Company,Email,Present\n';
         rows.forEach(row => {
-            csvContent += `${row.name},${row.company},${row.email},${row.present ? 'Yes' : 'No'}\n`;
+            csvContent += `${row.last_name},${row.first_name},${row.company},${row.email},${row.present ? 'Yes' : 'No'}\n`;
         });
 
         res.header('Content-Type', 'text/csv');
