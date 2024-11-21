@@ -261,7 +261,7 @@
         }
 
         function downloadCSV() {
-            let csvContent = 'Last Name,First Name,Company,Email,Present\n';
+            let csvContent = 'Name,Company,Email,Present\n';
             attendees.forEach(att => {
                 csvContent += `${att.last_name},${att.first_name},${att.company},${att.email},${att.present ? 'Yes' : 'No'}\n`;
             });
