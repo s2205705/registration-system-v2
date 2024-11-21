@@ -185,8 +185,8 @@
                 reader.onload = function(e) {
                     const rows = e.target.result.split('\n').map(row => row.trim());
                     attendees = rows.slice(1).filter(row => row).map((row, index) => {
-                        const [last_name, first_name, company, email] = row.split(',').map(field => field.trim());
-                        return { id: index, last_name, first_name, company, email, present: false };
+                        const [name, company, email] = row.split(',').map(field => field.trim());
+                        return { id: index, name, company, email, present: false };
                     });
                     displayAttendees(attendees);
                 };
