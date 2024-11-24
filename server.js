@@ -12,7 +12,7 @@ const db = new sqlite3.Database('./attendees.db');
 
 // Initialize the database
 db.serialize(() => {
-    db.run("CREATE TABLE IF NOT EXISTS attendees (id INTEGER PRIMARY KEY, name TEXT, company TEXT, email TEXT, present INTEGER)");
+    db.run("CREATE TABLE IF NOT EXISTS attendees (id INTEGER PRIMARY KEY, last_name TEXT,first_name TEXT, company TEXT, email TEXT, present INTEGER)");
 });
 
 // Endpoint to handle CSV upload and save to database
@@ -23,9 +23,8 @@ app.post('/upload-csv', upload.single('file'), (req, res) => {
     fs.createReadStream(filePath)
         .pipe(csvParser())
         .on('data', (row) => {
-            const {name, company, email } = row;
-            db.run("INSERT INTO attendees (name, company, email, present) VALUES (?, ?, ?, ?)", [name, company, email, 0]);
-            attendees.push({ name, company, email, present: false });
+            const {last_name,first_name,company, email } = row;last_name,first_name,company, email, 0]);
+            attendees.push({ last_name,first_name, company, email, present: false });
         })
         .on('end', () => {
             fs.unlinkSync(filePath); // Delete the uploaded file
