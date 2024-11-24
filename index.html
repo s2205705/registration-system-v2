@@ -139,7 +139,7 @@
             <span id="presentCount">Present: 0</span>
         </div>
         <div class="upload-section">
-            <label for="fileInput">Upload Attendee List (CSV):</label>
+            <label for="fileInput">Upload Attendee List (CSV - First Name, Last Name, Company, Email):</label>
             <input type="file" id="fileInput" accept=".csv">
         </div>
         <div class="search-section">
@@ -155,7 +155,8 @@
         <table id="attendeesTable">
             <thead>
                 <tr>
-                    <th>Name</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
                     <th>Company</th>
                     <th>Email</th>
                     <th>Present</th>
@@ -195,8 +196,8 @@
             reader.onload = function (e) {
                 const rows = e.target.result.split('\n').filter(Boolean);
                 attendees = rows.slice(1).map((row, index) => {
-                    const [name, company, email] = row.split(',').map(field => field.trim());
-                    return { id: index, name, company, email, present: false };
+                    const [firstName, lastName, company, email] = row.split(',').map(field => field.trim());
+                    return { id: index, firstName, lastName, company, email, present: false };
                 });
                 displayAttendees(attendees);
             };
@@ -208,7 +209,8 @@
             data.forEach(att => {
                 const row = `
                     <tr>
-                        <td>${att.name}</td>
+                        <td>${att.firstName}</td>
+                        <td>${att.lastName}</td>
                         <td>${att.company}</td>
                         <td>${att.email}</td>
                         <td><input type="checkbox" data-id="${att.id}" ${att.present ? 'checked' : ''}></td>
@@ -233,23 +235,28 @@
         }
 
         function sortAttendees() {
-            attendees.sort((a, b) => a.name.localeCompare(b.name));
+            attendees.sort((a, b) => 
+                `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`)
+            );
             displayAttendees(attendees);
         }
 
         function searchAttendees() {
             const query = searchInput.value.toLowerCase();
-            const filtered = attendees.filter(a => a.name.toLowerCase().includes(query));
+            const filtered = attendees.filter(a =>
+                `${a.firstName} ${a.lastName}`.toLowerCase().includes(query)
+            );
             displayAttendees(filtered);
         }
 
         function addAttendee() {
-            const name = prompt("Enter Name:").trim();
+            const firstName = prompt("Enter First Name:").trim();
+            const lastName = prompt("Enter Last Name:").trim();
             const company = prompt("Enter Company:").trim();
             const email = prompt("Enter Email:").trim();
 
-            if (name && company && email) {
-                attendees.push({ id: attendees.length, name, company, email, present: false });
+            if (firstName && lastName && company && email) {
+                attendees.push({ id: attendees.length, firstName, lastName, company, email, present: false });
                 displayAttendees(attendees);
             } else {
                 alert("All fields are required.");
@@ -258,7 +265,7 @@
 
         function downloadCSV() {
             const csvContent = "Name,Company,Email,Present\n" +
-                attendees.map(a => `${a.name},${a.company},${a.email},${a.present ? 'Yes' : 'No'}`).join('\n');
+                attendees.map(a => `${a.firstName} ${a.lastName},${a.company},${a.email},${a.present ? 'Yes' : 'No'}`).join('\n');
             const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
