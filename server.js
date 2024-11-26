@@ -23,13 +23,13 @@ app.post('/upload-csv', upload.single('file'), (req, res) => {
     fs.createReadStream(filePath)
         .pipe(csvParser())
         .on('data', (row) => {
-            const { last_name, first_name, company, email } = row;
+            const { last_name, firstname, company, email } = row;
             attendees.push({ last_name, first_name, company, email, present: 0 });
 
             // Insert each row into the database
             db.run(
-                "INSERT INTO attendees (last_name, first_name, company, email, present) VALUES (?, ?, ?, ?, ?)",
-                [last_name, first_name, company, email, 0],
+                "INSERT INTO attendees (name, company, email, present) VALUES (?, ?, ?, ?, ?)",
+                [name, company, email, 0],
                 (err) => {
                     if (err) {
                         console.error('Error inserting row:', err);
