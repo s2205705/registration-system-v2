@@ -138,6 +138,10 @@
             <label for="fileInput">Upload Attendee List (CSV):</label>
             <input type="file" id="fileInput" accept=".csv">
         </div>
+        <div class="count">
+            <span id="totalCount">Total Attendees: 0</span> | 
+            <span id="presentCount">Present: 0</span>
+        </div>
         <div class="search-section">
             <label for="searchInput">Search Attendee by Last Name:</label>
             <input type="text" id="searchInput" placeholder="Enter last name...">
@@ -162,10 +166,6 @@
                 <!-- Attendees will be populated here -->
             </tbody>
         </table>
-        <div class="count">
-            <span id="totalCount">Total Attendees: 0</span> | 
-            <span id="presentCount">Present: 0</span>
-        </div>
         <div class="buttons">
             <button id="downloadCSVButton">Download Updated CSV</button>
         </div>
