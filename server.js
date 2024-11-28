@@ -29,7 +29,7 @@ app.post('/upload-csv', upload.single('file'), (req, res) => {
             // Insert each row into the database
             db.run(
                 "INSERT INTO attendees (last_name, first_name, company, email, present) VALUES (?, ?, ?, ?, ?)",
-                [name, company, email, 0],
+                [last_name, first_name, company, email, 0],
                 (err) => {
                     if (err) {
                         console.error('Error inserting row:', err);
