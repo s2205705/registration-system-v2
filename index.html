@@ -134,10 +134,10 @@
 <body>
     <div class="container">
         <h1>Event Registration</h1>
-         <div class="count">
+        <div class="count">
             <span id="totalCount">Total Attendees: 0</span> | 
             <span id="presentCount">Present: 0</span>
-         </div>
+        </div>
         <div class="upload-section">
             <label for="fileInput">Upload Attendee List (CSV):</label>
             <input type="file" id="fileInput" accept=".csv">
@@ -261,16 +261,19 @@
         }
 
         function downloadCSV() {
-        let csvContent = 'Name,Company,Email,Present\n';
-        rows.forEach(row => {
-            const name = `${row.first_name} ${row.last_name}`; // Combine first_name and last_name
-            csvContent += `${name},${row.company},${row.email},${row.present ? 'Yes' : 'No'}\n`;
-        });
+            let csvContent = 'Last Name,First Name,Company,Email,Present\n';
+            attendees.forEach(row => {
+                csvContent += `${row.last_name},${row.first_name},${row.company},${row.email},${row.present}\n`;
+            });
+
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = 'updated_attendees.csv';
+            link.download = 'attendees.csv';
+            link.style.display = 'none';
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
