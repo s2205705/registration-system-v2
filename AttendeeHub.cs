@@ -1,3 +1,4 @@
+```csharp
 using Microsoft.AspNetCore.SignalR;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -33,3 +34,4 @@ public class Attendee
     public string Email { get; set; }
     public bool Present { get; set; }
 }
+```
