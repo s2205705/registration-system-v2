@@ -155,8 +155,7 @@
         <table id="attendeesTable">
             <thead>
                 <tr>
-                    <th>Last Name</th>
-                    <th>First Name</th>
+                    <th>Name</th>
                     <th>Company</th>
                     <th>Email</th>
                     <th>Present</th>
@@ -188,7 +187,7 @@
                     const rows = e.target.result.split('\n').map(row => row.trim());
                     attendees = rows.slice(1).filter(row => row).map((row, index) => {
                         const [last_name, first_name, company, email] = row.split(',').map(field => field.trim());
-                        return { id: index, last_name, first_name, company, email, present: false };
+                        return { id: index, name, company, email, present: false };
                     });
                     displayAttendees(attendees);
                 };
@@ -202,8 +201,7 @@
             data.forEach(attendee => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${attendee.last_name}</td>
-                    <td>${attendee.first_name}</td>
+                    <td>${attendee.name}</td>
                     <td>${attendee.company}</td>
                     <td>${attendee.email}</td>
                     <td><input type="checkbox" data-id="${attendee.id}" ${attendee.present ? 'checked' : ''}></td>
@@ -235,7 +233,7 @@
         }
 
         function sortAttendees() {
-            attendees.sort((a, b) => a.last_name.localeCompare(b.last_name));
+            attendees.sort((a, b) => a.name.localeCompare(b.name));
             displayAttendees(attendees);
         }
 
@@ -248,13 +246,12 @@
         }
 
         function addAttendee() {
-            const last_name = prompt('Enter Last Name:').trim();
-            const first_name = prompt('Enter First Name:').trim();
+            const last_name = prompt('Name:').trim();
             const company = prompt('Enter Company:').trim();
             const email = prompt('Enter Email:').trim();
 
-            if (last_name && first_name && company && email) {
-                attendees.push({ id: attendees.length, last_name, first_name, company, email, present: false });
+            if (name && company && email) {
+                attendees.push({ id: attendees.length, name, company, email, present: false });
                 displayAttendees(attendees);
             } else {
                 alert('All fields are required!');
@@ -262,9 +259,9 @@
         }
 
         function downloadCSV() {
-            let csvContent = 'Last Name,First Name,Company,Email,Present\n';
+            let csvContent = 'Name,Company,Email,Present\n';
             attendees.forEach(row => {
-                csvContent += `${row.last_name},${row.first_name},${row.company},${row.email},${row.present}\n`;
+                csvContent += `${row.name},${row.company},${row.email},${row.present}\n`;
             });
 
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
